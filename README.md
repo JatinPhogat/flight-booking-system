@@ -86,19 +86,3 @@ For deployment, this app also runs purely on Vercel Functions. The serverless AP
 
 - Tickets in serverless:
 	- Tickets are generated on demand and streamed from `/api/bookings/:id/ticket` (no disk storage).
-
-### Deploy on Vercel (Root: `client`)
-1. Push the repo to GitHub.
-2. In Vercel, import the project and set Root Directory to `client`.
-3. Add `MONGODB_URI` (and optional `APP_URL`) envs.
-4. Deploy — frontend and API are available under the same domain.
-
-### Local Development Option
-You can keep and use the [server](server) folder to run the Express backend locally later. For cloud deployment, the `client/api` serverless functions are sufficient.
-
-
-## Optional Enhancements
-- TailwindCSS styling
-- Authentication
-- Docker Compose for Mongo + server
-- Using AWS for Storage (can aquire costs)
