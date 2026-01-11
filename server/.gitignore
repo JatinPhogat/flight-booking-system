@@ -1,0 +1,23 @@
+# Node dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage
+coverage/
+
+# Generated tickets (PDFs)
+tickets/
+
+# OS / misc
+.DS_Store
+Thumbs.db
