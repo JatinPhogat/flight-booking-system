@@ -53,7 +53,7 @@ export default function BookingHistory({ userId }) {
               <td>₹{b.price_paid}</td>
               <td>{new Date(b.createdAt).toLocaleString()}</td>
               <td>{b.pnr}</td>
-              <td><a href={b.ticket_url} target="_blank" rel="noreferrer">Download</a></td>
+              <td><a href={`${b.ticket_url}?userId=${userId}`} target="_blank" rel="noreferrer">Download</a></td>
             </tr>
           ))}
         </tbody>

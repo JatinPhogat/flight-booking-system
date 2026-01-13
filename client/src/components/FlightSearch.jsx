@@ -23,7 +23,7 @@ export default function FlightSearch({ userId, onBooked }) {
   function loadFlights() {
     setLoading(true);
     setError('');
-    const url = new URL(`${apiBase}/flights`);
+    const url = new URL(`${apiBase}/flights`, window.location.origin);
     const dep = toTitleCase(departure.trim());
     const arr = toTitleCase(arrival.trim());
     if (dep) url.searchParams.set('departure', dep);
@@ -68,7 +68,7 @@ export default function FlightSearch({ userId, onBooked }) {
       setInfo(`Booked! PNR: ${data.booking.pnr}. Ticket: ${data.booking.ticket_url}`);
       if (onBooked) onBooked(data.wallet.balance);
       loadFlights();
-      window.open(data.booking.ticket_url, '_blank');
+      window.open(`${data.booking.ticket_url}?userId=${userId}`, '_blank');
     } catch (e) {
       setError('Booking failed');
     }
