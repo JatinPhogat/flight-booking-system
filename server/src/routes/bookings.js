@@ -68,7 +68,7 @@ router.post('/', async (req, res) => {
       createdAt: { $gt: fiveMinAgo }
     });
 
-    if (attemptCount >= 3) {
+    if (attemptCount > 3) {
       const existingAdj = await PriceAdjustment.findOne({
         flight_id,
         expiresAt: { $gt: new Date() }
