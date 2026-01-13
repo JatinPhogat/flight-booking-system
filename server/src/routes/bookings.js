@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
       price_paid: b.price_paid,
       pnr: b.pnr,
       createdAt: b.createdAt,
-      ticket_url: `${process.env.APP_URL || 'http://localhost:4000'}/tickets/${b.pnr}.pdf`
+      ticket_url: `${process.env.APP_URL || 'http://localhost:4000'}/api/bookings/${b._id}/ticket`
     }));
     res.json({ bookings: items });
   } catch (err) {
@@ -131,10 +131,16 @@ router.post('/', async (req, res) => {
 
 router.get('/:id/ticket', async (req, res) => {
   try {
-    const userId = getUserId(req);
+    const userId = req.query.userId || getUserId(req);
     const { id } = req.params;
-    const booking = await Booking.findOne({ _id: id, userId });
+    const booking = await Booking.findOne({ _id: id });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    
+    // Verify the booking belongs to this user
+    if (booking.userId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
     streamTicketPDF(res, booking);
   } catch (err) {
     console.error(err);
