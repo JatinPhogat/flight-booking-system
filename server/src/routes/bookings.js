@@ -59,29 +59,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'passenger_name and flight_id are required' });
     }
 
-    await Attempt.create({ userId, flight_id });
-
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const attemptCount = await Attempt.countDocuments({
-      userId,
-      flight_id,
-      createdAt: { $gt: fiveMinAgo }
-    });
-
-    if (attemptCount > 3) {
-      const existingAdj = await PriceAdjustment.findOne({
-        flight_id,
-        expiresAt: { $gt: new Date() }
-      });
-      if (!existingAdj) {
-        await PriceAdjustment.create({
-          flight_id,
-          increased_by_percent: 10,
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-        });
-      }
-    }
-
+    // Get current price BEFORE adding the new attempt
     const priceInfo = await getCurrentPrice(flight_id);
     if (!priceInfo) return res.status(404).json({ error: 'Flight not found' });
 
@@ -91,6 +69,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Insufficient wallet balance' });
     }
 
+    // Create the booking at current price
     const newBalance = balance - priceInfo.current_price;
     await Wallet.updateOne({ userId }, { balance: newBalance }, { upsert: true });
 
@@ -105,6 +84,31 @@ router.post('/', async (req, res) => {
       passenger_name,
       pnr
     });
+
+    // NOW record the attempt AFTER successful booking
+    await Attempt.create({ userId, flight_id });
+
+    // Check if we should create surge pricing (after 3rd successful booking)
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const attemptCount = await Attempt.countDocuments({
+      userId,
+      flight_id,
+      createdAt: { $gt: fiveMinAgo }
+    });
+
+    if (attemptCount >= 3) {
+      const existingAdj = await PriceAdjustment.findOne({
+        flight_id,
+        expiresAt: { $gt: new Date() }
+      });
+      if (!existingAdj) {
+        await PriceAdjustment.create({
+          flight_id,
+          increased_by_percent: 10,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+        });
+      }
+    }
 
     const ticket_url = `${process.env.APP_URL || 'http://localhost:4000'}/api/bookings/${booking._id}/ticket`;
 
